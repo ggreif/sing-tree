@@ -1,13 +1,11 @@
 {-# LANGUAGE DataKinds, KindSignatures, GADTs, TypeOperators,
-             StandaloneDeriving, RankNTypes #-}
+             StandaloneDeriving, RankNTypes, ScopedTypeVariables #-}
 
 module SingTree where
 
 import GHC.TypeLits
 import Data.Proxy
 import Data.Thrist
-
-hey = 1
 
 
 data Tree :: [Symbol] -> * where
@@ -19,6 +17,7 @@ deriving instance Show (Tree p)
 
 t1 = Fork (Proxy :: Proxy "dd") Leaf
 t2 = Furk Leaf :: forall p . Tree ("dd" ': p)
+t3 = Furk t2 :: forall p . Tree ("hh" ': "dd" ': p)
 
 getNodeName :: Tree (n ': p) -> String
 getNodeName t@(Furk _) = symbolVal (prox t)
@@ -26,3 +25,14 @@ getNodeName t@(Furk _) = symbolVal (prox t)
         prox _ = Proxy
 
 
+class KnownSymbolicPath (p :: [Symbol]) where
+  pathSing :: SSymbolPath p
+
+instance KnownSymbolicPath '[] where
+  pathSing = SSymbolPath []
+
+instance (KnownSymbol n, KnownSymbolicPath p) => KnownSymbolicPath (n ': p) where
+  pathSing = SSymbolPath (SomeSymbol (Proxy :: Proxy n) : rest)
+    where SSymbolPath rest = pathSing :: SSymbolPath p
+
+newtype SSymbolPath (s :: [Symbol]) = SSymbolPath [SomeSymbol]
