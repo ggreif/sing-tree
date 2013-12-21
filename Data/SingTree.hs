@@ -1,12 +1,19 @@
-{-# LANGUAGE DataKinds, KindSignatures, GADTs, TypeOperators,
-             StandaloneDeriving, RankNTypes, ScopedTypeVariables #-}
+{-# LANGUAGE DataKinds, PolyKinds, KindSignatures, GADTs, TypeOperators,
+             StandaloneDeriving, RankNTypes, ScopedTypeVariables,
+             ConstraintKinds, TypeFamilies #-}
 
 module SingTree where
 
 import GHC.TypeLits
+import GHC.Exts
 import Data.Proxy
 import Data.Thrist
 
+-- we want something like a directory tree
+-- Root, Directory, Node
+
+-- Mid-term TODO: lexicographic ordering
+-- Long term todo: diffing of (sub)trees
 
 data Tree :: [Symbol] -> * where
   Leaf :: Tree p
@@ -22,7 +29,12 @@ getNodeName t@(Fork _) = symbolVal (prox t)
   where prox :: Tree (n ': p) -> Proxy n
         prox _ = Proxy
 
+type family AppendPath (a :: [Symbol]) (b :: [Symbol]) :: [Symbol] where
+  AppendPath '[] b = b
+  AppendPath (a ': as) b = a ': AppendPath as b
 
+-- Stuff for singleton paths
+--
 class KnownSymbolicPath (p :: [Symbol]) where
   pathSing :: SSymbolPath p
 
@@ -34,3 +46,11 @@ instance (KnownSymbol n, KnownSymbolicPath p) => KnownSymbolicPath (n ': p) wher
     where SSymbolPath rest = pathSing :: SSymbolPath p
 
 newtype SSymbolPath (s :: [Symbol]) = SSymbolPath [SomeSymbol]
+
+-- UNRELATED?
+-- Toying around (this was part of a dream; I know this is crazy)
+
+data Foo (constr :: k -> Constraint) :: k -> * where
+  Bar :: constr a => Proxy a -> Foo constr a
+
+-- can we create an LE witness from an LE constraint?
