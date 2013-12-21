@@ -31,8 +31,10 @@ type Apart (l :: [[Symbol]]) (r :: [[Symbol]]) = '[] ~ Intersect (Roots l) (Root
 
 type family Intersect (l :: [k]) (r :: [k]) :: [k] where
   Intersect '[] r = '[]
+  Intersect l '[] = '[]
   Intersect (l ': ls) (l ': rs) = l ': Intersect ls rs
-  --Intersect (l ': ls) (l ': rs) = l ': Intersect ls rs
+  Intersect (l ': ls) (r ': rs) = Intersect (l ': ls) rs
+  -- TODO: buggy
 
 deriving instance Show (List t)
 
@@ -48,7 +50,8 @@ type family AllAppend (as :: [[Symbol]]) (b :: Symbol) :: [[Symbol]] where
 
 
 r0 = File :: Tree' '[ '["my.txt"] ]
---r1 = Ni `Sn` r0 `Sn` r0
+r0' = File :: Tree' '[ '["yours.txt"] ]
+r1 = Ni `Sn` r0 `Sn` r0'
 
 data Tree :: [Symbol] -> * where
   Root :: Tree '[]
