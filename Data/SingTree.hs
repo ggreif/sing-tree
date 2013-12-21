@@ -18,6 +18,14 @@ import Data.Thrist
 -- The tree must be parametrized in the list of all
 -- the paths it contains
 
+data Tree' :: [[Symbol]] -> * where
+  Root' :: Tree' '[]
+  File :: KnownSymbol file => Tree' '[ '[file] ]
+  --Dir :: 
+
+
+r0 = File :: Tree' '[ '["my.txt"] ]
+
 data Tree :: [Symbol] -> * where
   Root :: Tree '[]
   Leaf :: Tree p
@@ -37,6 +45,10 @@ getNodeName t@(Fork _) = symbolVal (prox t)
 type family AppendPath (a :: [Symbol]) (b :: [Symbol]) :: [Symbol] where
   AppendPath '[] b = b
   AppendPath (a ': as) b = a ': AppendPath as b
+
+type family Append (a :: [k]) (b :: [k]) :: [k] where
+  Append '[] b = b
+  Append (a ': as) b = a ': Append as b
 
 -- Stuff for singleton paths
 --
@@ -58,4 +70,4 @@ newtype SSymbolPath (s :: [Symbol]) = SSymbolPath [SomeSymbol]
 data Foo (constr :: k -> Constraint) :: k -> * where
   Bar :: constr a => Proxy a -> Foo constr a
 
--- can we create an LE witness from an LE constraint?
+-- can we create an LE witness (data type) from an LE constraint?
