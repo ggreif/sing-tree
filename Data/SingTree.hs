@@ -15,12 +15,17 @@ import Data.Thrist
 -- Mid-term TODO: lexicographic ordering
 -- Long term todo: diffing of (sub)trees
 
+-- The tree must be parametrized in the list of all
+-- the paths it contains
+
 data Tree :: [Symbol] -> * where
+  Root :: Tree '[]
   Leaf :: Tree p
   Fork :: KnownSymbol n => Tree p -> Tree (n ': p)
 
 deriving instance Show (Tree p)
 
+t0 = Root
 t2 = Fork Leaf :: forall p . Tree ("dd" ': p)
 t3 = Fork t2 :: forall p . Tree ("hh" ': "dd" ': p)
 
