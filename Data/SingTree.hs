@@ -2,7 +2,7 @@
              StandaloneDeriving, RankNTypes, ScopedTypeVariables,
              ConstraintKinds, TypeFamilies, UndecidableInstances #-}
 
-module SingTree where
+module Data.SingTree where
 
 import GHC.TypeLits
 import GHC.Exts
@@ -29,12 +29,26 @@ type family Roots (as :: [[Symbol]]) :: [Symbol] where
 
 type Apart (l :: [[Symbol]]) (r :: [[Symbol]]) = '[] ~ Intersect (Roots l) (Roots r)
 
+
+
 type family Intersect (l :: [k]) (r :: [k]) :: [k] where
   Intersect '[] r = '[]
   Intersect l '[] = '[]
-  Intersect (l ': ls) (l ': rs) = l ': Intersect ls rs
-  Intersect (l ': ls) (r ': rs) = Intersect (l ': ls) rs
-  -- TODO: buggy
+  Intersect (l ': ls) r = InterAppend (Intersect ls r) r l
+
+-- We need a helper to find one elem and return it appended if there
+
+type family InterAppend (l :: [k]) (r :: [k]) (one :: a) :: [k] where
+  InterAppend acc '[] one = acc
+  InterAppend acc (one ': rs) one = one ': acc
+  InterAppend acc (r ': rs) one = InterAppend acc rs one
+
+--type family Intersect (l :: [k]) (r :: [k]) :: [k] where
+--  Intersect '[] r = '[]
+--  Intersect l '[] = '[]
+--  Intersect (l ': ls) (l ': rs) = l ': Intersect ls rs
+--  Intersect (l ': ls) (r ': rs) = Intersect (l ': ls) rs
+--  -- TODO: buggy
 
 deriving instance Show (List t)
 
