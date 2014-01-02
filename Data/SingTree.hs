@@ -29,7 +29,7 @@ type family Roots (as :: [[Symbol]]) :: [Symbol] where
 
 type Apart (l :: [[Symbol]]) (r :: [[Symbol]]) = '[] ~ Intersect (Roots l) (Roots r)
 
-
+-- Apart is just a convenience layer over Intersect, below
 
 type family Intersect (l :: [k]) (r :: [k]) :: [k] where
   Intersect '[] r = '[]
@@ -42,13 +42,6 @@ type family InterAppend (l :: [k]) (r :: [k]) (one :: a) :: [k] where
   InterAppend acc '[] one = acc
   InterAppend acc (one ': rs) one = one ': acc
   InterAppend acc (r ': rs) one = InterAppend acc rs one
-
---type family Intersect (l :: [k]) (r :: [k]) :: [k] where
---  Intersect '[] r = '[]
---  Intersect l '[] = '[]
---  Intersect (l ': ls) (l ': rs) = l ': Intersect ls rs
---  Intersect (l ': ls) (r ': rs) = Intersect (l ': ls) rs
---  -- TODO: buggy
 
 deriving instance Show (List t)
 
